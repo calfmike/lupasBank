@@ -2,7 +2,7 @@
 
 [Lea esta documentación en español](README.es.md)
 
-## Introduction --- !!!!! IMPORTANT !!!!
+## Introduction --- !!!! IMPORTANT !!!!
 Just to be clear, this is a project made 100% with IA, applying my functional and technical skills to show the knowledge I acquired after 10 years of working in IT. 
 
 lupasBank is a comprehensive banking application that allows users to manage their accounts, perform transactions, and more. This document outlines the functionalities implemented in the application.
@@ -22,9 +22,6 @@ lupasBank is a comprehensive banking application that allows users to manage the
 - [Admin](#admin)
   - [Admin Management](#admin-management)
 - [Backoffice Integration](#backoffice-integration)
-- [Developer Setup](#developer-setup)
-- [Contributing](#contributing)
-- [Deployment](#deployment)
 - [Demo](#demo)
 
 ## Users
