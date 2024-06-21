@@ -80,3 +80,23 @@ exports.rejectUser = async (req, res) => {
         res.status(500).json({ msg: 'Server error' });
     }
 };
+
+exports.updateUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { email } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        user.email = email;
+        await user.save();
+
+        res.status(200).json({ msg: 'User updated', user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ msg: 'Server error' });
+    }
+};
