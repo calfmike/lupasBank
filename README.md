@@ -3,9 +3,10 @@
 [Lea esta documentación en español](README.es.md)
 
 ## Introduction --- !!!! IMPORTANT !!!!
-## Just to be clear, this is a project made 100% with IA, applying my functional and technical skills to show the knowledge I acquired after 10 years of working in IT. 
-## Inside /src there is the swagger.json to see the postman collection detail on any swagger editor like https://editor.swagger.io/ hope you like it ! It was fun to create it.
+## Just to be fair, this is a project made 100% with IA, made for fun and in a way that my knowledge can be demonstrated in a practical way, applying the skills I acquired after 10 years of working in IT. Inside /src/backend there is the swagger.json to see the postman collection detail on any swagger editor like https://editor.swagger.io/ hope you like it ! It was fun to create it.
 
+
+## -- Yet to implement the frontEnd for the final User. The first version of the BO is already merged, I have pending to make a video with a demo of the app. But i havve the enviroment setUp in case there is someone curious about it, we can arrange a meet and ill show you with pleasure my little monster (?)
 lupasBank is a comprehensive banking application that allows users to manage their accounts, perform transactions, and more. This document outlines the functionalities implemented in the application.
 
 ## Table of Contents
