@@ -1,6 +1,7 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {  loginAdmin } from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -11,38 +12,27 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      const fetchUser = async () => {
-        try {
-          const response = await axios.get('http://localhost:5000/api/auth/me', {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-          setUser(response.data);
-        } catch (error) {
-          console.error('Failed to fetch user', error);
-          localStorage.removeItem('token');
-          setUser(null);
-        }
-      };
-      fetchUser();
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser({ token });
     }
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (email, password, isAdmin = false) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/admin/login', { username, password });
-      localStorage.setItem('token', response.data.token);
-      setUser({ username });
+      const data = isAdmin && await loginAdmin({ email, password }) ;
+      const { token } = data;
+      localStorage.setItem('token', token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser({ token });
       navigate('/dashboard');
     } catch (error) {
-      console.error('Login failed:', error.response.data.msg);
-      throw error;
+      console.error('Login failed:', error);
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     navigate('/login');
   };
@@ -57,3 +47,5 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   return useContext(AuthContext);
 };
+
+export default AuthContext;

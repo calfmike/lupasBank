@@ -1,64 +1,51 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AuthContext from '../context/AuthContext';
 
 const LoginForm = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
-  const [error, setError] = useState(null);
+  const { user, login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
-      await login(username, password);
-    } catch (error) {
-      const errorMsg = error.response && error.response.data ? error.response.data.msg : 'Login failed';
-      setError(errorMsg);
-      console.error('Login failed:', errorMsg);
+      await login(email, password);
+    } catch (err) {
+      console.log('Login failed:', err.message);
     }
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-            Username
-          </label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="username"
-            placeholder="Username"
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-            Password
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            id="password"
-            placeholder="******************"
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            type="submit"
-          >
-            Sign In
-          </button>
-        </div>
-        {error && <p className="text-red-500 text-xs italic mt-4">{error}</p>}
-      </form>
-    </div>
+    <form onSubmit={handleLogin} className="bg-white p-8 shadow-md rounded">
+      <h2 className="text-2xl mb-6">Login</h2>
+      <div className="mb-4">
+        <label className="block mb-2">Email</label>
+        <input
+          type="text"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded"
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Password</label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded"
+        />
+      </div>
+      <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">Login</button>
+    </form>
   );
 };
 

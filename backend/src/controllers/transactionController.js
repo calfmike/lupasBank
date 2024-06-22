@@ -1,16 +1,11 @@
-const Transaction = require('../models/Transaction');
-const Account = require('../models/Account');
+const dbQueries = require('../utils/dbQueries');
 
 exports.createTransaction = async (req, res) => {
     const { fromAccountIdentifier, toAccountIdentifier, amount, reason } = req.body;
 
     try {
-        const fromAcc = await Account.findOne({
-            $or: [{ cbu: fromAccountIdentifier }, { alias: fromAccountIdentifier }]
-        });
-        const toAcc = await Account.findOne({
-            $or: [{ cbu: toAccountIdentifier }, { alias: toAccountIdentifier }]
-        });
+        const fromAcc = await dbQueries.findAccountByIdentifier(fromAccountIdentifier);
+        const toAcc = await dbQueries.findAccountByIdentifier(toAccountIdentifier);
 
         if (!fromAcc || !toAcc) {
             return res.status(404).json({ msg: 'One or both accounts not found' });
@@ -23,18 +18,16 @@ exports.createTransaction = async (req, res) => {
         fromAcc.balance -= amount;
         toAcc.balance += amount;
 
-        await fromAcc.save();
-        await toAcc.save();
+        await dbQueries.updateUser(fromAcc);
+        await dbQueries.updateUser(toAcc);
 
-        const newTransaction = new Transaction({
+        const newTransaction = await dbQueries.createTransaction({
             fromAccount: fromAcc._id,
             toAccount: toAcc._id,
             amount,
             reason: reason || 'internalTransfer',
             status: 'completed'
         });
-
-        await newTransaction.save();
 
         res.status(201).json({ msg: 'Transaction completed successfully', transaction: newTransaction });
     } catch (err) {
@@ -43,19 +36,11 @@ exports.createTransaction = async (req, res) => {
 };
 
 exports.getTransactionsByAccount = async (req, res) => {
-    const { accountIdentifier } = req.params;
-
     try {
-        const account = await Account.findOne({
-            $or: [{ cbu: accountIdentifier }, { alias: accountIdentifier }]
-        });
-
+        const account = await dbQueries.findAccountByIdentifier(req.params.accountIdentifier);
         if (!account) return res.status(404).json({ msg: 'Account not found' });
 
-        const transactions = await Transaction.find({
-            $or: [{ fromAccount: account._id }, { toAccount: account._id }]
-        });
-
+        const transactions = await dbQueries.getTransactionsByAccountId(account._id);
         res.json(transactions);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -66,25 +51,19 @@ exports.createCreditNote = async (req, res) => {
     const { accountIdentifier, amount } = req.body;
 
     try {
-        const account = await Account.findOne({
-            $or: [{ cbu: accountIdentifier }, { alias: accountIdentifier }]
-        });
-
+        const account = await dbQueries.findAccountByIdentifier(accountIdentifier);
         if (!account) return res.status(404).json({ msg: 'Account not found' });
 
         account.balance += amount;
+        await dbQueries.updateUser(account);
 
-        await account.save();
-
-        const newTransaction = new Transaction({
+        const newTransaction = await dbQueries.createTransaction({
             fromAccount: null,
             toAccount: account._id,
             amount,
             reason: 'creditNote',
             status: 'completed'
         });
-
-        await newTransaction.save();
 
         res.status(201).json({ msg: 'Credit note created successfully', transaction: newTransaction });
     } catch (err) {
@@ -96,10 +75,7 @@ exports.createDebitNote = async (req, res) => {
     const { accountIdentifier, amount } = req.body;
 
     try {
-        const account = await Account.findOne({
-            $or: [{ cbu: accountIdentifier }, { alias: accountIdentifier }]
-        });
-
+        const account = await dbQueries.findAccountByIdentifier(accountIdentifier);
         if (!account) return res.status(404).json({ msg: 'Account not found' });
 
         if (account.balance < amount) {
@@ -107,18 +83,15 @@ exports.createDebitNote = async (req, res) => {
         }
 
         account.balance -= amount;
+        await dbQueries.updateUser(account);
 
-        await account.save();
-
-        const newTransaction = new Transaction({
+        const newTransaction = await dbQueries.createTransaction({
             fromAccount: account._id,
             toAccount: null,
             amount,
             reason: 'debitNote',
             status: 'completed'
         });
-
-        await newTransaction.save();
 
         res.status(201).json({ msg: 'Debit note created successfully', transaction: newTransaction });
     } catch (err) {
