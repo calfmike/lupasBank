@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import useAuth from '../context/useAuth';
+import EditUserModal from '../components/EditUserModal';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -30,6 +33,28 @@ const Users = () => {
     fetchUsers();
   }, [token, navigate]);
 
+  const handleUpdate = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/admin/users', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      navigate('/login');
+    }
+  };
+
+  const handleEditClick = (user) => {
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <button
@@ -54,6 +79,9 @@ const Users = () => {
               </th>
               <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Onboarding Status
+              </th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Actions
               </th>
             </tr>
           </thead>
@@ -92,13 +120,24 @@ const Users = () => {
                     <span className="relative">{user.onboardingStatus}</span>
                   </span>
                 </td>
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  <button
+                    onClick={() => handleEditClick(user)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    ✏️
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {isModalOpen && (
+        <EditUserModal user={selectedUser} onClose={closeModal} onUpdate={handleUpdate} />
+      )}
     </div>
   );
 };
 
-export default Users;
+export default Users; 
