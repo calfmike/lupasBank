@@ -1,30 +1,50 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider } from './context/AuthProvider';
+import Header from './components/Header';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Accounts from './pages/Accounts';
 import Transactions from './pages/Transactions';
-import Login from './pages/Login';
-import PrivateRoute from './components/PrivateRoute';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import Header from './components/Header';
+import useAuth from './context/useAuth';
 
-function App() {
+const AppContent = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const token = localStorage.getItem('token');
+
+  if (token && location.pathname === '/login') {
+    return <Navigate to="/dashboard" />;
+  }
+
+  if (!token && location.pathname !== '/login') {
+    return <Navigate to="/login" />;
+  }
+
   return (
-    <Router>
-      <AuthProvider>
-        <Header />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<PrivateRoute component={Dashboard} />} />
-          <Route path="/users" element={<PrivateRoute component={Users} />} />
-          <Route path="/accounts" element={<PrivateRoute component={Accounts} />} />
-          <Route path="/transactions" element={<PrivateRoute component={Transactions} />} />
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
-      </AuthProvider>
-    </Router>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/users" element={<Users />} />
+      <Route path="/accounts" element={<Accounts />} />
+      <Route path="/transactions" element={<Transactions />} />
+      <Route path="/" element={<Navigate to="/dashboard" />} />
+    </Routes>
   );
-}
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Header />
+          <AppContent />
+        </div>
+      </Router>
+    </AuthProvider>
+  );
+};
 
 export default App;

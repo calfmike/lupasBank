@@ -1,13 +1,11 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import {  loginAdmin } from '../utils/api';
+import { loginAdmin } from '../utils/api';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -17,14 +15,13 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = async (email, password, isAdmin = false) => {
+  const login = async (username, password) => {
     try {
-      const data = isAdmin && await loginAdmin({ email, password }) ;
+      const data = await loginAdmin({ username, password });
       const { token } = data;
-      localStorage.setItem('token', token);
+      localStorage.setItem('token', token); // Guardar solo 'token'
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       setUser({ token });
-      navigate('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
     }
@@ -34,7 +31,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
-    navigate('/login');
   };
 
   return (
@@ -44,8 +40,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
-
-export default AuthContext;
+export { AuthContext };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const Transactions = () => {
@@ -6,29 +6,23 @@ const Transactions = () => {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/admin/transactions', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        setTransactions(response.data);
-      } catch (error) {
-        console.error('Failed to fetch transactions', error);
-      }
+      const token = localStorage.getItem('adminToken');
+      const response = await axios.get('http://localhost:5000/api/transactions', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setTransactions(response.data);
     };
-
     fetchTransactions();
   }, []);
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold">Transactions</h1>
-      <ul className="mt-4">
+      <h1 className="text-2xl mb-4">Transactions</h1>
+      <ul>
         {transactions.map(transaction => (
-          <li key={transaction._id}>
-            {transaction.reason} - {transaction.amount}
-          </li>
+          <li key={transaction._id}>{transaction.amount} ({transaction.reason})</li>
         ))}
       </ul>
     </div>
