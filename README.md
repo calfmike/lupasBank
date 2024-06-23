@@ -65,4 +65,5 @@ Admins can register and log in to the backoffice. Admins can also retrieve a lis
 The backoffice is integrated with the API to manage users, accounts, and transactions without requiring admins to have regular user accounts or enrollment.
 
 ## Demo
+![image](https://github.com/calfmike/lupasBank/assets/49999749/c7c996cf-c0f9-40bd-8a41-9350f4595102)
 A demo of the APIs integrated with a BO, and a user front end are coming soon.
